@@ -6,13 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{$title}}</title>
     <link rel="stylesheet" href="{{ asset('assets/bootstrap/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ asset('assets/styles.css')}}">
 </head>
 <body>
-    @include('nav')
-
     @yield('content')
 
-    @include('footer')
     <script src="{{ asset('assets/bootstrap/bootstrap.bundle.min.js')}}"></script>
 </body>
 </html>

@@ -9,38 +9,29 @@ class Main extends Controller
 {
     public function index()
     {
-        $data = [
-            'title' => 'teste',
-            'description' => 'aPRENDENDO'
-        ];
-       return view('main', $data);
+        echo 'gestor de tarefas';
     }
 
-    public function users()
-    {
-        //get users with raw sql
-        $users = DB::select('SELECT * FROM users');
-
-        //with query builder
-        $users1 = DB::table('users')->get();
-
-        //with query builder - return in array
-        $users2 = DB::table('users')->get()->toArray();
-        
-        //using Eloquent ORM
-        $model = new UserModel();
-        $users3 = $model->all();
-        
-        foreach ($users3 as $user) {
-            echo $user->username . '<br>';
-        }
-    }
-
-    public function view()
+    public function login()
     {
         $data = [
-            'title' => 'Titulo da página'
+            'title' => 'Login'
         ];
-        return view('home', $data);
+        return view('login_frm', $data);
+    }
+
+    public function login_submit()
+    {
+        echo 'submissão do login';
+    }
+
+    //main page
+
+    public function main()
+    {
+        $data = [
+            'title' => 'Main'
+        ];
+        return view('main', $data);
     }
 }
