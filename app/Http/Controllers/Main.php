@@ -22,7 +22,16 @@ class Main extends Controller
 
     public function login_submit()
     {
-        echo 'submissão do login';
+        //fake login
+        //session()->put('username', 'admin');
+        session(null)->put('username','admin');
+        echo 'Logado';
+    }
+
+    public function logout()
+    {
+        session(null)->forget('username');
+        return redirect()->route('login');
     }
 
     //main page
