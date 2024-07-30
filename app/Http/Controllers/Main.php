@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\TaskModel;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +11,8 @@ class Main extends Controller
     public function index()
     {
         $data = [
-            'title' => 'Gestor de Tarefas'
+            'title' => 'Gestor de Tarefas',
+            'tasks' => $this->_get_tasks()
         ];
         return view('main', $data);
     }
@@ -59,6 +61,28 @@ class Main extends Controller
     {
         session()->forget('username');
         return redirect()->route('login');
+    }
+
+
+    public function new_task()
+    {
+        $data = [
+            'title' => 'Nova Tarefa'
+        ];
+
+        return view('new_task_frm', $data);
+    }
+
+    public function new_task_submit()
+    {
+        echo 'salvar nova tarefa';
+    }
+
+    private function _get_tasks()
+    {
+
+        $model = TaskModel::where('id_user', session('id'))->whereNull('deleted_at')->get();
+        return $model;
     }
 
 }
