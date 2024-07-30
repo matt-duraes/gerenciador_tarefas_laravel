@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Route;
 // in app
 Route::middleware([CheckLogin::class])->group(function() {
     Route::get('/', [Main::class, 'index'])->name('index');
-    Route::get('/main', [Main::class, 'main'])->name('main');
     Route::get('/logout', [Main::class, 'logout'])->name('logout');
 });
 

@@ -16,7 +16,7 @@ class CheckLogin
     public function handle(Request $request, Closure $next): Response
     {
         //check if user is logged in
-        if (!session(null)->has('username')) {
+        if (!session()->has('username')) {
             return redirect()->route('login');
         }
         return $next($request);
