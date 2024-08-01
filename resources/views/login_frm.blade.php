@@ -18,8 +18,7 @@
                 <label for="text_password" class="form-label">Senha</label>
                 <input type="password" name="text_password" id="text_password" class="form-control" placeholder="Senha" required value="{{old('text_password')}}">
                 @error('text_password')
-                 <div class="text-warning">{{$errors->get('text_password')[0]}}</div>
-
+                    <div class="text-warning">{{$errors->get('text_password')[0]}}</div>
                 @enderror
             </div>
             <div class="mb-3">
