@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\TaskRequest;
 use App\Models\TaskModel;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
@@ -8,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class Main extends Controller
 {
+    public function store(TaskRequest $request)
+    {
+        // O código para processar a tarefa vai aqui
+    }
+
     public function index()
     {
         $data = [
@@ -26,18 +33,9 @@ class Main extends Controller
         return view('login_frm', $data);
     }
 
-    public function login_submit(Request $request)
+    public function login_submit(LoginRequest $request)
     {
-       //form validation
-        $request->validate([
-            'text_username' => 'required|min:3',
-            'text_password'=> 'required|min:5'
-        ], [
-            'text_username.required' => 'O campo usuário é obrigatório.',
-            'text_password.required' => 'O campo senha é obrigatório.',
-            'text_username.min' => 'O campo usuário deve ter no mínimo ao menos 3 caracteres.',
-            'text_password.min' => 'O campo senha deve receber ao menos 8 caracteres.'
-        ]);
+
         //get form data
         $username = $request->input('text_username');
         $password = $request->input('text_password');
@@ -74,19 +72,8 @@ class Main extends Controller
         return view('new_task_frm', $data);
     }
 
-    public function new_task_submit(Request $request)
+    public function new_task_submit(TaskRequest $request)
     {
-        $request->validate([
-            'text_task_name' => 'required|min:3|max:200',
-            'text_task_description'=> 'required|min:5|max:1000'
-        ], [
-            'text_task_name.required' => 'O nome da tarefa é obrigatório.',
-            'text_task_description.required' => 'O campo descrição é obrigatório.',
-            'text_task_name.min' => 'O campo nome da tarefa deve ter no mínimo ao menos 3 caracteres.',
-            'text_task_description.min' => 'O campo descrição da tarefa deve ter no mínimo deve receber ao menos 5 caracteres.',
-            'text_task_name.max' => 'O campo nome da tarefa deve ter no máximo 200 caracteres.',
-            'text_task_description.max' => 'O campo descrição da tarefa deve ter no máximo 1000 caracteres.',
-        ]);
 
         $task_name = $request->input('text_task_name');
         $task_description = $request->input('text_task_description');
