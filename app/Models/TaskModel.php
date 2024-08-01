@@ -11,4 +11,11 @@ class TaskModel extends Model
 
     protected $table = 'tasks';
 
+    protected $fillable = [
+        'id_user',
+        'task_name',
+        'task_description',
+        'task_status',
+        'created_at'
+    ];
 }

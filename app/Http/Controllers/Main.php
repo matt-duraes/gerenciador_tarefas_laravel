@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\AuthService as AppAuthService;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\TaskRequest;
 use App\Models\TaskModel;
@@ -8,8 +9,21 @@ use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+
 class Main extends Controller
 {
+    protected $authService;
+    protected $taskModel;
+
+    // Injetar AuthService no construtor
+    public function __construct(AppAuthService $authService, TaskModel $taskModel)
+    {
+        $this->authService = $authService;
+        $this->taskModel = $taskModel;
+
+    }
+
+
     public function store(TaskRequest $request)
     {
         // O código para processar a tarefa vai aqui
@@ -35,25 +49,20 @@ class Main extends Controller
 
     public function login_submit(LoginRequest $request)
     {
-
-        //get form data
         $username = $request->input('text_username');
         $password = $request->input('text_password');
+        $user = $this->authService->authenticate($username, $password);
 
-        $user = UserModel::where('username', $username)->whereNull('deleted_at')->first();
-        if($user) {
-            //check if password is correct
-            if(password_verify($password,$user->password )) {
-                $session_data = [
-                    'id' => $user->id,
-                    'username' => $user->username
-                ];
-                session($session_data);
-                return redirect()->route('index');
-            }
+        if ($user) {
+            $session_data = [
+                'id' => $user->id,
+                'username' => $user->username
+            ];
+            session($session_data);
+            return redirect()->route('index');
+        } else {
+            return back()->withErrors(['text_password' => 'Senha incorreta ou usuário não encontrado.']);
         }
-
-       return redirect()->route('login')->withInput()->with('login_error', 'Login inválido');
     }
 
     public function logout()
@@ -68,7 +77,6 @@ class Main extends Controller
         $data = [
             'title' => 'Nova Tarefa'
         ];
-
         return view('new_task_frm', $data);
     }
 
@@ -77,18 +85,24 @@ class Main extends Controller
 
         $task_name = $request->input('text_task_name');
         $task_description = $request->input('text_task_description');
+        $user_id = session('id');
 
-        $model = new TaskModel();
-        $task = $model->where('id_user', '=' , session('id'))->where('task_name','=', $task_name)->whereNull('deleted_at')->first();
+        $task= TaskModel::where('id_user', session('id'))->where('task_name', $task_name)->whereNull('deleted_at')->first();
         if($task) {
             return redirect()->route('new_task')->with('task_error', 'Já existe uma terefa com mesmo nome');
         }
-        $model->id_user = session('id');
-        $model->task_name = $task_name;
-        $model->task_description = $task_description;
-        $model->task_status = 'new';
-        $model->created_at = date('Y-m-d H:i:s');
-        $model->save();
+
+
+        // Criar nova tarefa usando Eloquent
+        TaskModel::create([
+            'id_user' => $user_id,
+            'task_name' => $task_name,
+            'task_description' => $task_description,
+            'task_status' => 'new',
+            'created_at' => now()
+        ]);
+
+
         return redirect()->route('index');
     }
 
