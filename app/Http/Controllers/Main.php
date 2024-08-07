@@ -2,11 +2,13 @@
 namespace App\Http\Controllers;
 
 use App\AuthService as AppAuthService;
+use App\Http\Requests\EditRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\TaskRequest;
 use App\Models\TaskModel;
 use App\Models\UserModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 
@@ -20,7 +22,6 @@ class Main extends Controller
     {
         $this->authService = $authService;
         $this->taskModel = $taskModel;
-
     }
 
 
@@ -36,6 +37,7 @@ class Main extends Controller
             'tasks' => $this->_get_tasks(),
             'datatables' => true
         ];
+
         return view('main', $data);
     }
 
@@ -44,6 +46,7 @@ class Main extends Controller
         $data = [
             'title' => 'Login'
         ];
+
         return view('login_frm', $data);
     }
 
@@ -59,15 +62,18 @@ class Main extends Controller
                 'username' => $user->username
             ];
             session($session_data);
+
             return redirect()->route('index');
-        } else {
-            return back()->withErrors(['text_password' => 'Senha incorreta ou usuário não encontrado.']);
-        }
+        };
+
+        return back()->withErrors(['text_password' => 'Senha incorreta ou usuário não encontrado.']);
+
     }
 
     public function logout()
     {
-        session()->forget('username');
+       session()->forget('username');
+
         return redirect()->route('login');
     }
 
@@ -77,6 +83,7 @@ class Main extends Controller
         $data = [
             'title' => 'Nova Tarefa'
         ];
+
         return view('new_task_frm', $data);
     }
 
@@ -88,10 +95,10 @@ class Main extends Controller
         $user_id = session('id');
 
         $task= TaskModel::where('id_user', session('id'))->where('task_name', $task_name)->whereNull('deleted_at')->first();
+
         if($task) {
             return redirect()->route('new_task')->with('task_error', 'Já existe uma terefa com mesmo nome');
         }
-
 
         // Criar nova tarefa usando Eloquent
         TaskModel::create([
@@ -102,9 +109,51 @@ class Main extends Controller
             'created_at' => now()
         ]);
 
-
         return redirect()->route('index');
     }
+
+    public function edit_task($id)
+    {
+        try {
+            $id = Crypt::decrypt($id);
+        } catch (\Exception $e) {
+            return redirect()->route('index');
+        }
+
+        $task = TaskModel::where('id', $id)->whereNull('deleted_at')->first();
+        if(!$task) {
+            return redirect()->route('index');
+        }
+
+        $data = [
+            'title' => 'Editar Tarefa',
+            'task' => $task
+        ];
+
+        return view('edit_task_frm', $data);
+    }
+
+    public function edit_task_submit(EditRequest $request)
+    {
+        $task_id = null;
+
+        try {
+            $task_id = Crypt::decrypt($request->input('task_id'));
+        } catch(\Exception $e) {
+            return redirect()->route('index');
+        }
+
+        $task_name = $request->input('text_task_name');
+        $task_description = $request->input('text_task_description');
+        $task_status = $request->input('text_task_status');
+
+        dd([
+            $task_name,
+            $task_description,
+            $task_status
+        ]);
+    }
+
 
     private function _get_tasks()
     {
@@ -112,8 +161,8 @@ class Main extends Controller
         $collection = [];
 
         foreach($model as $task) {
-            $link_edit = '<a href="'.route('edit_task', ['id' => $task->id]).'" class="btn btn-secondary m-1"> <i class="bi bi-pencil-square"></i></i></a>';
-            $link_delete = '<a href="'.route('delete_task', ['id' => $task->id]).'" class="btn btn-secondary m-1"> <i class="bi bi-trash"></i></i></a>';
+            $link_edit = '<a href="'.route('edit_task', ['id' => Crypt::encrypt( $task->id)]).'" class="btn btn-secondary m-1"> <i class="bi bi-pencil-square"></i></i></a>';
+            $link_delete = '<a href="'.route('delete_task', ['id' => Crypt::encrypt( $task->id)]).'" class="btn btn-secondary m-1"> <i class="bi bi-trash"></i></i></a>';
 
             $collection[] = [
                 'task_name' => $task->task_name,
