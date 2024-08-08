@@ -77,7 +77,6 @@ class Main extends Controller
         return redirect()->route('login');
     }
 
-
     public function new_task()
     {
         $data = [
@@ -114,11 +113,7 @@ class Main extends Controller
 
     public function edit_task($id)
     {
-        try {
-            $id = Crypt::decrypt($id);
-        } catch (\Exception $e) {
-            return redirect()->route('index');
-        }
+        $id = $this->_decryptId($id);
 
         $task = TaskModel::where('id', $id)->whereNull('deleted_at')->first();
         if(!$task) {
@@ -133,38 +128,98 @@ class Main extends Controller
         return view('edit_task_frm', $data);
     }
 
+
     public function edit_task_submit(EditRequest $request)
     {
-        $task_id = null;
 
-        try {
-            $task_id = Crypt::decrypt($request->input('task_id'));
-        } catch(\Exception $e) {
+        $task_id = $this->_decryptTaskId($request->input('task_id'));
+        if (!$task_id) {
             return redirect()->route('index');
         }
 
         $task_name = $request->input('text_task_name');
         $task_description = $request->input('text_task_description');
         $task_status = $request->input('text_task_status');
+        $user_id = session('id');
 
-        $task = TaskModel::where('id_user', session('id'))
-                        ->where('task_name', $task_name)
-                        ->where('id', "!=", $task_id)
-                        ->whereNull('deleted_at')
-                        ->first();
-        if($task) {
-            return redirect()->route('edit_task', ['id' => Crypt::encrypt($task_id)])->with('task_error', 'Já existe outra tarefa com o mesmo nome');
+        if ($this->_taskExists($user_id, $task_name, $task_id)) {
+            return redirect()->route('edit_task', ['id' => Crypt::encrypt($task_id)])
+                            ->with('task_error', 'Já existe outra tarefa com o mesmo nome');
         }
 
+        $this->_updateTask($task_id, $task_name, $task_description, $task_status);
+
+        return redirect()->route('index');
+    }
+
+    public function delete_task($id)
+    {
+        $id = $this->_decryptId($id);
+
+        $task = TaskModel::where('id', $id)->first();
+
+        if(!$task) {
+            return redirect()->route('index');
+        }
+
+        $data = [
+            'title' => 'Excluir Tarefa',
+            'task' => $task
+        ];
+
+        return view('delete_task', $data);
+
+    }
+
+    public function delete_task_confirm($id)
+    {
+       $task_id = $this->_decryptTaskId($id);
+        if ($task_id) {
+            TaskModel::where('id', $task_id)->delete();
+        }
+
+        return redirect()->route('index');
+    }
+
+    // ================================================
+    //  FUNÇÕES PRIVADAS
+    // =================================================
+    private function _decryptTaskId($encrypted_task_id)
+    {
+        try {
+            return Crypt::decrypt($encrypted_task_id);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function _decryptId($id)
+    {
+        try {
+            return Crypt::decrypt($id);
+        } catch (\Exception $e) {
+            return redirect()->route('index');
+        }
+    }
+
+    private function _taskExists($user_id, $task_name, $task_id)
+    {
+        return TaskModel::where('id_user', $user_id)
+                        ->where('task_name', $task_name)
+                        ->where('id', '!=', $task_id)
+                        ->whereNull('deleted_at')
+                        ->exists();
+    }
+
+    private function _updateTask($task_id, $task_name, $task_description, $task_status)
+    {
         TaskModel::where('id', $task_id)->update([
             'task_name' => $task_name,
             'task_description' => $task_description,
             'task_status' => $task_status,
-            'updated_at' => date('Y-m-d H:i:s')
+            'updated_at' => now()
         ]);
-        return redirect()->route('index');
     }
-
 
     private function _get_tasks()
     {
@@ -184,6 +239,7 @@ class Main extends Controller
 
         return $collection;
     }
+
     private function _status_name($status) {
         $status_colletion = [
             'new' => 'Nova',
