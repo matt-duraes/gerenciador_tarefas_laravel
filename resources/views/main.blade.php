@@ -38,6 +38,9 @@
     $(document).ready( function() {
         $('#table_tasks').DataTable({
             data: @json($tasks),
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.1.3/i18n/pt-BR.json'
+            },
             columns: [
                 {data: 'task_name'},
                 {data: 'task_status', className:'text-center'},
