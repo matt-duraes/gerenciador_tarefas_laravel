@@ -1,7 +1,7 @@
 @extends('templates/main_layout')
 
 @section('content')
-    <div class="container">
+    <div class="container my-5">
         <div class="row">
             <div class="col">
                 <div class="row align-items-center">
@@ -16,7 +16,7 @@
                     </div>
                 </div>
                 @if(count($tasks) != 0)
-                    <table class="table table-striped table-bordered" id="table_tasks" width="100%">
+                    <table class="table table-striped table-bordered my-5" id="table_tasks" width="100%">
                         <thead class="table-dark">
                             <tr>
                                 <th class="w-75">Tarefa</th>
@@ -24,7 +24,7 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="my-5">
 
                         </tbody>
                     </table>
@@ -42,9 +42,9 @@
                 url: '//cdn.datatables.net/plug-ins/2.1.3/i18n/pt-BR.json'
             },
             columns: [
-                {data: 'task_name'},
-                {data: 'task_status', className:'text-center'},
-                {data: 'task_actions', className:'text-center'}
+                {data: 'task_name', className:'align-middle'},
+                {data: 'task_status', className:'text-center align-middle'},
+                {data: 'task_actions', className:'text-center align-middle'}
             ]
         })
     })

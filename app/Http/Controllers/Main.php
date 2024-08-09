@@ -96,7 +96,7 @@ class Main extends Controller
         $task= TaskModel::where('id_user', session('id'))->where('task_name', $task_name)->whereNull('deleted_at')->first();
 
         if($task) {
-            return redirect()->route('new_task')->with('task_error', 'Já existe uma terefa com mesmo nome');
+            return redirect()->route('new_task')->withInput()->with('task_error', 'Já existe uma terefa com mesmo nome');
         }
 
         // Criar nova tarefa usando Eloquent
@@ -249,9 +249,25 @@ class Main extends Controller
         ];
 
         if(key_exists($status, $status_colletion)) {
+           return '<span class="'.$this->_status_bagde($status).'">'.$status_colletion[$status].'</span>';
+        } else {
+            return '<span class="'.$this->_status_bagde('Desconhecido').'">Desconhecido</span>';
+        }
+    }
+
+    private function _status_bagde($status)
+    {
+        $status_colletion = [
+            'new' => 'badge bg-primary',
+            'in_progress' => 'badge bg-secondary',
+            'cancelled' => 'badge bg-danger',
+            'completed' => 'badge bg-success',
+        ];
+
+        if(key_exists($status, $status_colletion)) {
             return $status_colletion[$status];
         } else {
-            return 'Desconhecido';
+            return 'badge bg-secondary';
         }
     }
 
