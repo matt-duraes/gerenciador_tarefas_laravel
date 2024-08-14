@@ -1,1 +1,1 @@
-Gerenciador de tarefas utilizando Laravel, Bootstrap e Jquery.
+Criação de um gerenciador de tarefas utilizando Laravel + blade, Bootstrap e Jquery.
